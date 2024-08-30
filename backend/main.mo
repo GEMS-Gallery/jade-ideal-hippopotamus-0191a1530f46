@@ -14,6 +14,7 @@ actor {
     id: Nat;
     text: Text;
     completed: Bool;
+    icon: Text;
   };
 
   // Stable variables
@@ -29,16 +30,16 @@ actor {
   };
 
   // Public functions
-  public func addTask(text: Text) : async Nat {
+  public func addTask(text: Text, icon: Text) : async Nat {
     let id = taskIdCounter;
     let newTask: Task = {
       id = id;
       text = text;
       completed = false;
+      icon = icon;
     };
 
     if (id >= tasks.size()) {
-      // Extend the array if necessary
       let newTasks = Array.tabulate<(?Task)>(id + 1, func (i: Nat): ?Task {
         if (i < tasks.size()) { tasks[i] } else { null }
       });
@@ -60,6 +61,7 @@ actor {
           id = task.id;
           text = task.text;
           completed = not task.completed;
+          icon = task.icon;
         };
         tasks[id] := ?updatedTask;
         return true;

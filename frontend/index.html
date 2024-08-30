@@ -1,13 +1,573 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jack's Chore App</title>
-  </head>
-  <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.tsx"></script>
-  </body>
+    <style>
+        :root {
+            --primary-color: #6772e5;
+            --secondary-color: #24b47e;
+            --background-color: #f6f9fc;
+            --card-color: #ffffff;
+            --text-color: #32325d;
+            --border-radius: 8px;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, 'Helvetica Neue', sans-serif;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 480px;
+            background-color: var(--card-color);
+            border-radius: var(--border-radius);
+            box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
+            padding: 2rem;
+        }
+
+        .header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .profile-pic {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 1rem;
+        }
+
+        .greeting {
+            flex-grow: 1;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .date {
+            font-size: 0.9rem;
+            color: #8898aa;
+        }
+
+        .task-list {
+            list-style-type: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .task-item {
+            background-color: #f7fafc;
+            border-radius: var(--border-radius);
+            padding: 1rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .task-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 14px rgba(50, 50, 93, 0.1), 0 3px 6px rgba(0, 0, 0, 0.08);
+        }
+
+        .task-icon {
+            width: 24px;
+            height: 24px;
+            margin-right: 1rem;
+            font-size: 24px;
+        }
+
+        .task-text {
+            flex-grow: 1;
+            font-weight: 500;
+        }
+
+        .task-checkbox {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--primary-color);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .task-checkbox.checked {
+            background-color: var(--primary-color);
+            position: relative;
+        }
+
+        .task-checkbox.checked::after {
+            content: '✓';
+            color: white;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 14px;
+        }
+
+        .progress-container {
+            margin-top: 2rem;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background-color: #e6ebf1;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress {
+            height: 100%;
+            background-color: var(--secondary-color);
+            width: 0%;
+            transition: width 0.5s ease-in-out;
+        }
+
+        .progress-text {
+            text-align: center;
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            color: #8898aa;
+        }
+
+        .add-task {
+            margin-top: 2rem;
+        }
+
+        .add-task input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #e6ebf1;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .add-task input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .add-task button {
+            width: 100%;
+            padding: 0.75rem;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-top: 0.5rem;
+        }
+
+        .add-task button:hover {
+            background-color: #7795f8;
+        }
+
+        .celebration {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .celebration.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .celebration-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            text-align: center;
+            max-width: 80%;
+        }
+
+        .celebration-title {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .celebration-message {
+            font-size: 1.2rem;
+            margin-bottom: 1rem;
+        }
+
+        .reward-wheel-container {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            margin: 20px auto;
+        }
+
+        .reward-wheel {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            border: 10px solid #f1c40f;
+            position: relative;
+            overflow: hidden;
+            transition: transform 5s cubic-bezier(0.25, 0.1, 0.25, 1);
+        }
+
+        .reward-wheel-section {
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 150px 86.6px 0 86.6px;
+            border-color: transparent;
+            transform-origin: 50% 100%;
+            left: 50%;
+            top: 0;
+            margin-left: -86.6px;
+        }
+
+        .reward-wheel-icon {
+            position: absolute;
+            font-size: 24px;
+            left: 50%;
+            top: 20px;
+            transform: translateX(-50%);
+        }
+
+        .wheel-pointer {
+            width: 0;
+            height: 0;
+            border-left: 20px solid transparent;
+            border-right: 20px solid transparent;
+            border-top: 40px solid #f1c40f;
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 2;
+        }
+
+        .spin-button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+        }
+
+        .prize-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            text-align: center;
+            z-index: 1001;
+            display: none;
+        }
+
+        .prize-popup.show {
+            display: block;
+            animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes popIn {
+            0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
+
+        .prize-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .prize-text {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 1rem;
+        }
+
+        @keyframes firework {
+            0% { transform: translate(var(--x), var(--initialY)); width: 0.5vmin; opacity: 1; }
+            50% { width: 0.5vmin; opacity: 1; }
+            100% { width: 0.5vmin; opacity: 0; transform: translate(var(--x), var(--finalY)); }
+        }
+
+        .firework,
+        .firework::before,
+        .firework::after {
+            --initialY: 60vmin;
+            content: "";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 0.5vmin;
+            aspect-ratio: 1;
+            background:
+                radial-gradient(circle, #ff0 0.2vmin, #0000 0) 50% 00%,
+                radial-gradient(circle, #ff0 0.3vmin, #0000 0) 00% 50%,
+                radial-gradient(circle, #ff0 0.5vmin, #0000 0) 50% 99%,
+                radial-gradient(circle, #ff0 0.2vmin, #0000 0) 99% 50%,
+                radial-gradient(circle, #ff0 0.3vmin, #0000 0) 80% 90%,
+                radial-gradient(circle, #ff0 0.5vmin, #0000 0) 95% 90%,
+                radial-gradient(circle, #ff0 0.5vmin, #0000 0) 10% 60%,
+                radial-gradient(circle, #ff0 0.2vmin, #0000 0) 31% 80%,
+                radial-gradient(circle, #ff0 0.3vmin, #0000 0) 80% 10%,
+                radial-gradient(circle, #ff0 0.2vmin, #0000 0) 90% 23%,
+                radial-gradient(circle, #ff0 0.3vmin, #0000 0) 45% 20%,
+                radial-gradient(circle, #ff0 0.5vmin, #0000 0) 13% 24%;
+            background-size: 0.5vmin 0.5vmin;
+            background-repeat: no-repeat;
+            animation: firework var(--duration) infinite;
+        }
+
+        .firework::before {
+            transform: translate(-50%, -50%) rotate(25deg) !important;
+        }
+
+        .firework::after {
+            transform: translate(-50%, -50%) rotate(-37deg) !important;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <img src="https://media.licdn.com/dms/image/v2/C5603AQGthJL_DcMSIA/profile-displayphoto-shrink_400_400/profile-displayphoto-shrink_400_400/0/1518390992422?e=1730332800&v=beta&t=FwHENS15u_vMr1BrmzIrzyw_-pJot2UyLMC7FchSILo" alt="Profile Picture" class="profile-pic">
+            <div class="greeting">
+                <h1>Hi, Jack!</h1>
+                <div class="date" id="currentDate"></div>
+            </div>
+        </div>
+        <ul class="task-list" id="taskList">
+            <!-- Tasks will be added here dynamically -->
+        </ul>
+        <div class="progress-container">
+            <div class="progress-bar">
+                <div class="progress" id="progress"></div>
+            </div>
+            <div class="progress-text" id="progressText"></div>
+        </div>
+        <div class="add-task">
+            <input type="text" id="newTask" placeholder="Add a new task">
+            <button onclick="addTask()">Add Task</button>
+        </div>
+    </div>
+
+    <div class="celebration" id="celebration">
+        <div class="celebration-content">
+            <div class="celebration-title">
+                <span class="celebration-emoji">🎉</span>
+                <span class="celebration-emoji">🏆</span>
+                <span class="celebration-emoji">🎊</span>
+            </div>
+            <h2 class="celebration-title">Great job, Jack!</h2>
+            <p class="celebration-message">You've completed all your tasks!</p>
+            <p>Spin the wheel to get your reward:</p>
+            <div class="reward-wheel-container">
+                <div class="wheel-pointer"></div>
+                <div class="reward-wheel" id="rewardWheel"></div>
+            </div>
+            <button class="spin-button" onclick="spinWheel()">Spin the Wheel!</button>
+        </div>
+    </div>
+
+    <div class="prize-popup" id="prizePopup">
+        <div class="prize-icon" id="prizeIcon"></div>
+        <div class="prize-text" id="prizeText"></div>
+        <button onclick="closePrizePopup()">Awesome!</button>
+    </div>
+
+    <script>
+       const tasks = [
+            { id: 1, text: "Take vitamin", completed: false, icon: "💊" },
+            { id: 2, text: "Eat breakfast", completed: false, icon: "🥣" },
+            { id: 3, text: "Brush teeth", completed: false, icon: "🦷" },
+            { id: 4, text: "Get dressed", completed: false, icon: "👕" },
+            { id: 5, text: "Put clothes in hamper", completed: false, icon: "🧺" },
+            { id: 6, text: "Clean up dog poop", completed: false, icon: "💩" }
+        ];
+
+        const rewards = [
+            { text: "20 min Fortnite", color: "#FF6B6B", icon: "🎮" },
+            { text: "Ice Cream Sundae", color: "#4ECDC4", icon: "🍦" },
+            { text: "Movie Night", color: "#45B7D1", icon: "🍿" },
+            { text: "Extra Allowance", color: "#FFA07A", icon: "💰" },
+            { text: "Pizza Party", color: "#98D8C8", icon: "🍕" },
+            { text: "Board Game Night", color: "#F7DC6F", icon: "🎲" }
+        ];
+
+        function renderTasks() {
+            const taskList = document.getElementById('taskList');
+            taskList.innerHTML = '';
+            tasks.forEach(task => {
+                const li = document.createElement('li');
+                li.className = 'task-item';
+                li.innerHTML = `
+                    <span class="task-icon">${task.icon}</span>
+                    <span class="task-text">${task.text}</span>
+                    <div class="task-checkbox ${task.completed ? 'checked' : ''}" onclick="toggleTask(${task.id})"></div>
+                `;
+                taskList.appendChild(li);
+            });
+            updateProgress();
+        }
+
+        function toggleTask(id) {
+            const task = tasks.find(t => t.id === id);
+            if (task) {
+                task.completed = !task.completed;
+                renderTasks();
+                checkAllTasksCompleted();
+            }
+        }
+
+        function updateProgress() {
+            const completed = tasks.filter(t => t.completed).length;
+            const total = tasks.length;
+            const percentage = Math.round((completed / total) * 100);
+            document.getElementById('progress').style.width = `${percentage}%`;
+            document.getElementById('progressText').textContent = `${completed} of ${total} tasks completed`;
+        }
+
+        function addTask() {
+            const newTaskInput = document.getElementById('newTask');
+            const text = newTaskInput.value.trim();
+            if (text) {
+                const newId = tasks.length > 0 ? Math.max(...tasks.map(t => t.id)) + 1 : 1;
+                tasks.push({ id: newId, text, completed: false, icon: "✨" });
+                newTaskInput.value = '';
+                renderTasks();
+            }
+        }
+
+        function updateDate() {
+            const now = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('currentDate').textContent = now.toLocaleDateString('en-US', options);
+        }
+
+        function checkAllTasksCompleted() {
+            if (tasks.every(task => task.completed)) {
+                showCelebration();
+            }
+        }
+
+        function showCelebration() {
+            const celebration = document.getElementById('celebration');
+            celebration.classList.add('show');
+            createFireworks();
+            renderRewardWheel();
+        }
+
+        function createFireworks() {
+            for (let i = 0; i < 5; i++) {
+                const firework = document.createElement('div');
+                firework.className = 'firework';
+                firework.style.setProperty('--x', `${Math.random() * 100}vw`);
+                firework.style.setProperty('--initialY', `${100 + Math.random() * 40}vh`);
+                firework.style.setProperty('--finalY', `${10 + Math.random() * 30}vh`);
+                firework.style.setProperty('--duration', `${0.7 + Math.random() * 0.8}s`);
+                document.body.appendChild(firework);
+
+                setTimeout(() => {
+                    firework.remove();
+                }, 2000);
+            }
+        }
+
+        function renderRewardWheel() {
+            const wheel = document.getElementById('rewardWheel');
+            wheel.innerHTML = '';
+            rewards.forEach((reward, index) => {
+                const section = document.createElement('div');
+                section.className = 'reward-wheel-section';
+                section.style.transform = `rotate(${index * (360 / rewards.length)}deg)`;
+                section.style.borderTopColor = reward.color;
+                
+                const icon = document.createElement('div');
+                icon.className = 'reward-wheel-icon';
+                icon.textContent = reward.icon;
+                icon.style.transform = `rotate(${-index * (360 / rewards.length)}deg)`;
+                
+                section.appendChild(icon);
+                wheel.appendChild(section);
+            });
+        }
+
+        function spinWheel() {
+            const wheel = document.getElementById('rewardWheel');
+            const spinButton = document.querySelector('.spin-button');
+            spinButton.disabled = true;
+            const randomDegrees = Math.floor(Math.random() * 360) + 720; // At least 2 full spins
+            wheel.style.transform = `rotate(${randomDegrees}deg)`;
+            
+            setTimeout(() => {
+                const winningIndex = Math.floor(((360 - (randomDegrees % 360)) / 360) * rewards.length);
+                const winningReward = rewards[winningIndex];
+                showPrizePopup(winningReward);
+                spinButton.disabled = false;
+            }, 5000);
+        }
+
+        function showPrizePopup(reward) {
+            const prizePopup = document.getElementById('prizePopup');
+            const prizeIcon = document.getElementById('prizeIcon');
+            const prizeText = document.getElementById('prizeText');
+
+            prizeIcon.textContent = reward.icon;
+            prizeText.textContent = `You won: ${reward.text}`;
+            prizePopup.classList.add('show');
+        }
+
+        function closePrizePopup() {
+            const prizePopup = document.getElementById('prizePopup');
+            prizePopup.classList.remove('show');
+            document.getElementById('celebration').classList.remove('show');
+            resetTasks();
+        }
+
+        function resetTasks() {
+            tasks.forEach(task => task.completed = false);
+            renderTasks();
+        }
+
+        // Initial render
+        renderTasks();
+        updateDate();
+    </script>
+</body>
 </html>

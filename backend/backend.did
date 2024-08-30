@@ -1,11 +1,12 @@
 type Task = 
  record {
    completed: bool;
+   icon: text;
    id: nat;
    "text": text;
  };
 service : {
-  addTask: (text) -> (nat);
+  addTask: (text, text) -> (nat);
   getProgress: () -> (float64) query;
   getTasks: () -> (vec Task) query;
   toggleTask: (nat) -> (bool);

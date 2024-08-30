@@ -2,9 +2,14 @@ import type { Principal } from '@dfinity/principal';
 import type { ActorMethod } from '@dfinity/agent';
 import type { IDL } from '@dfinity/candid';
 
-export interface Task { 'id' : bigint, 'text' : string, 'completed' : boolean }
+export interface Task {
+  'id' : bigint,
+  'icon' : string,
+  'text' : string,
+  'completed' : boolean,
+}
 export interface _SERVICE {
-  'addTask' : ActorMethod<[string], bigint>,
+  'addTask' : ActorMethod<[string, string], bigint>,
   'getProgress' : ActorMethod<[], number>,
   'getTasks' : ActorMethod<[], Array<Task>>,
   'toggleTask' : ActorMethod<[bigint], boolean>,
